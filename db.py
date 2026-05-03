@@ -14,12 +14,18 @@ def init_db():
         with conn.cursor() as cur:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS entries (
-                    id          SERIAL PRIMARY KEY,
-                    entry_date  DATE NOT NULL,
-                    hours       NUMERIC(4,2) NOT NULL,
-                    description TEXT NOT NULL,
-                    created_at  TIMESTAMP DEFAULT NOW()
+                    id                SERIAL PRIMARY KEY,
+                    entry_date        DATE NOT NULL,
+                    hours             NUMERIC(4,2) NOT NULL,
+                    description       TEXT NOT NULL,
+                    concepts_learned  TEXT,
+                    created_at        TIMESTAMP DEFAULT NOW()
                 )
+            """)
+            # Safe to run on existing tables — adds column only if missing
+            cur.execute("""
+                ALTER TABLE entries
+                ADD COLUMN IF NOT EXISTS concepts_learned TEXT
             """)
         conn.commit()
     finally:
@@ -31,7 +37,8 @@ def get_entries_for_week(week_start, week_end):
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(
-                """SELECT id, entry_date, CAST(hours AS FLOAT) AS hours, description
+                """SELECT id, entry_date, CAST(hours AS FLOAT) AS hours,
+                          description, concepts_learned
                    FROM entries
                    WHERE entry_date >= %s AND entry_date <= %s
                    ORDER BY entry_date, created_at""",
@@ -42,13 +49,14 @@ def get_entries_for_week(week_start, week_end):
         conn.close()
 
 
-def add_entry(entry_date, hours, description):
+def add_entry(entry_date, hours, description, concepts_learned=None):
     conn = get_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO entries (entry_date, hours, description) VALUES (%s, %s, %s)",
-                (entry_date, hours, description),
+                """INSERT INTO entries (entry_date, hours, description, concepts_learned)
+                   VALUES (%s, %s, %s, %s)""",
+                (entry_date, hours, description, concepts_learned or None),
             )
         conn.commit()
     finally:

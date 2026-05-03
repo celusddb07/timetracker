@@ -49,12 +49,13 @@ def build_report(week_start, week_end, entries):
         doc.add_heading(day.strftime("%A, %d %B %Y"), level=2)
 
         # Table with header row
-        table = doc.add_table(rows=1, cols=2)
+        table = doc.add_table(rows=1, cols=3)
         table.style = "Table Grid"
 
         hdr_cells = table.rows[0].cells
         hdr_cells[0].text = "Hours"
         hdr_cells[1].text = "Description"
+        hdr_cells[2].text = "Concepts Learned"
         for cell in hdr_cells:
             _set_cell_bg(cell, "D9D9D9")
             for para in cell.paragraphs:
@@ -66,14 +67,17 @@ def build_report(week_start, week_end, entries):
             row_cells = table.add_row().cells
             row_cells[0].text = f"{entry['hours']:.2f}"
             row_cells[1].text = entry["description"]
+            row_cells[2].text = entry["concepts_learned"] or ""
             day_total += entry["hours"]
 
         # Day subtotal row
         sub_cells = table.add_row().cells
         sub_cells[0].text = f"{day_total:.2f}"
         sub_cells[1].text = "Day total"
+        sub_cells[2].text = ""
         _set_cell_bg(sub_cells[0], "EBF3FB")
         _set_cell_bg(sub_cells[1], "EBF3FB")
+        _set_cell_bg(sub_cells[2], "EBF3FB")
         for cell in sub_cells:
             for para in cell.paragraphs:
                 for run in para.runs:

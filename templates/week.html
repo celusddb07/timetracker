@@ -37,38 +37,54 @@
 
     {# Existing entries #}
     {% for entry in entries %}
-    <div class="d-flex align-items-center entry-row mb-1">
-      <span class="badge bg-light text-dark border me-2" style="min-width:54px;">
-        {{ "%.2f"|format(entry.hours) }} h
-      </span>
-      <span class="flex-grow-1">{{ entry.description }}</span>
-      <form method="post" action="/entry/delete/{{ entry.id }}" class="ms-2 mb-0">
-        <input type="hidden" name="week_str" value="{{ week_str }}">
-        <button type="submit" class="btn btn-outline-danger btn-sm btn-delete"
-                title="Remove entry">&times;</button>
-      </form>
+    <div class="entry-row mb-2">
+      <div class="d-flex align-items-center">
+        <span class="badge bg-light text-dark border me-2" style="min-width:54px;">
+          {{ "%.2f"|format(entry.hours) }} h
+        </span>
+        <span class="flex-grow-1">{{ entry.description }}</span>
+        <form method="post" action="/entry/delete/{{ entry.id }}" class="ms-2 mb-0">
+          <input type="hidden" name="week_str" value="{{ week_str }}">
+          <button type="submit" class="btn btn-outline-danger btn-sm btn-delete"
+                  title="Remove entry">&times;</button>
+        </form>
+      </div>
+      {% if entry.concepts_learned %}
+      <div class="ms-4 mt-1 text-muted small fst-italic">
+        &#128161; {{ entry.concepts_learned }}
+      </div>
+      {% endif %}
     </div>
     {% endfor %}
 
     {# Add-entry form #}
-    <form method="post" action="/entry/add" class="d-flex gap-2 mt-2 align-items-center">
-      <input type="hidden" name="week_str"    value="{{ week_str }}">
-      <input type="hidden" name="entry_date"  value="{{ day.isoformat() }}">
-      <input type="number"
-             name="hours"
-             placeholder="hrs"
-             step="0.25"
-             min="0.25"
-             max="24"
-             class="form-control form-control-sm"
-             style="width:80px;"
-             required>
-      <input type="text"
-             name="description"
-             placeholder="What did you work on?"
-             class="form-control form-control-sm"
-             required>
-      <button type="submit" class="btn btn-primary btn-sm text-nowrap">+ Add</button>
+    <form method="post" action="/entry/add" class="mt-2">
+      <input type="hidden" name="week_str"   value="{{ week_str }}">
+      <input type="hidden" name="entry_date" value="{{ day.isoformat() }}">
+      <div class="d-flex gap-2 align-items-center mb-1">
+        <input type="number"
+               name="hours"
+               placeholder="hrs"
+               step="0.25"
+               min="0.25"
+               max="24"
+               class="form-control form-control-sm"
+               style="width:80px;"
+               required>
+        <input type="text"
+               name="description"
+               placeholder="What did you work on?"
+               class="form-control form-control-sm"
+               required>
+        <button type="submit" class="btn btn-primary btn-sm text-nowrap">+ Add</button>
+      </div>
+      <div class="ms-0">
+        <input type="text"
+               name="concepts_learned"
+               placeholder="&#128161; New concepts learned (optional)"
+               class="form-control form-control-sm text-muted"
+               style="font-style:italic;">
+      </div>
     </form>
 
   </div>

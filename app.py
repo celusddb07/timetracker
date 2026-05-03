@@ -117,11 +117,12 @@ def add_entry():
     entry_date = request.form.get("entry_date")
     hours = request.form.get("hours")
     description = (request.form.get("description") or "").strip()
+    concepts_learned = (request.form.get("concepts_learned") or "").strip() or None
     week_str = request.form.get("week_str", "")
 
     if entry_date and hours and description:
         try:
-            db.add_entry(entry_date, float(hours), description)
+            db.add_entry(entry_date, float(hours), description, concepts_learned)
         except Exception as exc:
             print(f"add_entry error: {exc}")
 
