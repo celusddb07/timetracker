@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+
+{# ---- Week navigation bar ---- #}
+<div class="d-flex align-items-center gap-2 mb-4 flex-wrap">
+  <a href="/week/{{ prev_week }}" class="btn btn-outline-secondary btn-sm">&larr; Prev</a>
+
+  <h5 class="mb-0 mx-1">
+    Week of {{ week_start.strftime('%d %b') }} &ndash; {{ week_end.strftime('%d %b %Y') }}
+  </h5>
+
+  <a href="/week/{{ next_week }}" class="btn btn-outline-secondary btn-sm">Next &rarr;</a>
+
+  <span class="badge bg-secondary ms-2" style="font-size:.9rem;">
+    {{ "%.2f"|format(total_hours) }} hrs total
+  </span>
+
+  <a href="/report/{{ week_str }}" class="btn btn-success btn-sm ms-auto">
+    &#11123; Word Report
+  </a>
+</div>
+
+{# ---- One card per day ---- #}
+{% for day, entries in days.items() %}
+<div class="card mb-3 day-card">
+
+  <div class="card-header d-flex justify-content-between align-items-center py-2">
+    <strong>{{ day.strftime('%A') }}</strong>
+    <span class="text-muted small">{{ day.strftime('%d %b %Y') }}</span>
+    {% set day_total = entries | sum(attribute='hours') %}
+    {% if day_total > 0 %}
+    <span class="badge bg-primary">{{ "%.2f"|format(day_total) }} hrs</span>
+    {% endif %}
+  </div>
+
+  <div class="card-body py-2 px-3">
+
+    {# Existing entries #}
+    {% for entry in entries %}
+    <div class="d-flex align-items-center entry-row mb-1">
+      <span class="badge bg-light text-dark border me-2" style="min-width:54px;">
+        {{ "%.2f"|format(entry.hours) }} h
+      </span>
+      <span class="flex-grow-1">{{ entry.description }}</span>
+      <form method="post" action="/entry/delete/{{ entry.id }}" class="ms-2 mb-0">
+        <input type="hidden" name="week_str" value="{{ week_str }}">
+        <button type="submit" class="btn btn-outline-danger btn-sm btn-delete"
+                title="Remove entry">&times;</button>
+      </form>
+    </div>
+    {% endfor %}
+
+    {# Add-entry form #}
+    <form method="post" action="/entry/add" class="d-flex gap-2 mt-2 align-items-center">
+      <input type="hidden" name="week_str"    value="{{ week_str }}">
+      <input type="hidden" name="entry_date"  value="{{ day.isoformat() }}">
+      <input type="number"
+             name="hours"
+             placeholder="hrs"
+             step="0.25"
+             min="0.25"
+             max="24"
+             class="form-control form-control-sm"
+             style="width:80px;"
+             required>
+      <input type="text"
+             name="description"
+             placeholder="What did you work on?"
+             class="form-control form-control-sm"
+             required>
+      <button type="submit" class="btn btn-primary btn-sm text-nowrap">+ Add</button>
+    </form>
+
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}
